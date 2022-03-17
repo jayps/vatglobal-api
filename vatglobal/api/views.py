@@ -1,11 +1,13 @@
 import csv
 import io
+from datetime import datetime
 
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from vatglobal.api.serializers import UploadSerializer
+from vatglobal.api.serializers import UploadSerializer, TransactionSerializer
 
 
 class TransactionUploadView(APIView):
@@ -24,13 +26,32 @@ class TransactionUploadView(APIView):
 
         next(reader) # Skip the header
         done = False
-
+        line = 1
         while not done:
             try:
                 row = next(reader) # We're using a generator here to save on memory.
-                print(row)
-                # TODO:
+                type = row[1].lower()
+                # if type == 'sele':
+                #     type = 'sale'
+                # if type == 'parchase':
+                #     type = 'purchase'
+                transaction = TransactionSerializer(
+                    data={
+                        'date': datetime.strptime(row[0], '%Y/%m/%d').date(),
+                        'type': type,
+                        'country': row[2],
+                        'currency': row[3],
+                        'net': row[4],
+                        'vat': row[5],
+                    }
+                )
+                transaction.is_valid(raise_exception=True)
+                transaction.save()
+                line += 1
+            except ValidationError as e:
+                return Response(data=e.detail, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
+                print('Done! ', e)
                 done = True
 
         return Response(data=serializer.validated_data, status=status.HTTP_201_CREATED)
