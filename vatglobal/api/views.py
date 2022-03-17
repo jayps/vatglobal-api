@@ -13,11 +13,24 @@ class TransactionUploadView(APIView):
         serializer = UploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        file = request.FILES['file']
+        file = request.FILES['file'] # Get the file from the request
+
+        # Since we're not saving the file, just using it in memory, we have to do a little magic.
+        # Check out https://andromedayelton.com/2017/04/25/adventures-with-parsing-django-uploaded-csv-files-in-python3/ for a more in depth explanation.
+        # Basically, we're reading the file from memory as bytes, decoding that to a string, and producing an input for a CSV reader.
         decoded_file = file.read().decode('UTF-8')
         csv_string = io.StringIO(decoded_file)
-        for line in csv.reader(csv_string, delimiter=','):
-            print(line)
+        reader = csv.reader(csv_string, delimiter=',')
 
+        next(reader) # Skip the header
+        done = False
+
+        while not done:
+            try:
+                row = next(reader) # We're using a generator here to save on memory.
+                print(row)
+                # TODO:
+            except Exception as e:
+                done = True
 
         return Response(data=serializer.validated_data, status=status.HTTP_201_CREATED)
