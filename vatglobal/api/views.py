@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer, UploadResponseSerializer
+from vatglobal.api.serializers import UploadRequestSerializer
 from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv
 
 
