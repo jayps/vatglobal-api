@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    container_name: vatglobal-api
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - WORKER_COUNT=3
+      - WORKER_TIMEOUT=300

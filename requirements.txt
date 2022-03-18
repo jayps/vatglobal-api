@@ -12,7 +12,12 @@ django==4.0.3
     #   djangorestframework
 djangorestframework==3.13.1
     # via -r requirements.in
+gunicorn==20.1.0
+    # via -r requirements.in
 pytz==2021.3
     # via djangorestframework
 sqlparse==0.4.2
     # via django
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
