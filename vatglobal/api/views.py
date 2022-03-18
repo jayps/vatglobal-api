@@ -31,10 +31,11 @@ class TransactionUploadView(APIView):
             try:
                 row = next(reader) # We're using a generator here to save on memory.
                 type = row[1].lower()
-                # if type == 'sele':
-                #     type = 'sale'
-                # if type == 'parchase':
-                #     type = 'purchase'
+                # TODO: Conditionally execute this based on an environment variable.
+                if type == 'sele':
+                    type = 'sale'
+                if type == 'parchase':
+                    type = 'purchase'
                 transaction = TransactionSerializer(
                     data={
                         'date': datetime.strptime(row[0], '%Y/%m/%d').date(),
@@ -50,8 +51,7 @@ class TransactionUploadView(APIView):
                 line += 1
             except ValidationError as e:
                 return Response(data=e.detail, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                print('Done! ', e)
+            except StopIteration:
                 done = True
 
         return Response(data=serializer.validated_data, status=status.HTTP_201_CREATED)
