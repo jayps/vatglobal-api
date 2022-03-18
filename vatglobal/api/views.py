@@ -41,8 +41,25 @@ class TransactionUploadView(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class TransactionViewSet(ReadOnlyModelViewSet):
-    queryset = Transaction.objects.order_by('date')
-    serializer_class = TransactionSerializer
-    filterset_class = TransactionFilter
+class TransactionViewSet(APIView):
+    def get(self, request):
+        queryset = Transaction.objects.order_by('date')
+
+        date = request.GET.get('date')
+        if not date:
+            return Response(data={'error': 'date query parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            filtered_date = datetime.strptime(date, '%Y-%m-%d').date()
+        except ValueError as e:
+            return Response(data={'error': 'date query parameter must be in the format YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        country = request.GET.get('country')
+        if len(country) != 2:
+            return Response(data={'error': 'country query parameter must be ISO-3166-1 alpha-2'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        queryset = queryset.filter(date=filtered_date, country=country)
+
+        return Response(data=TransactionSerializer(queryset[:5], many=True).data, status=status.HTTP_200_OK)
 
