@@ -3,8 +3,9 @@ from rest_framework import serializers
 from vatglobal.api.models import Transaction
 
 
-class UploadSerializer(serializers.Serializer):
+class UploadRequestSerializer(serializers.Serializer):
     file = serializers.FileField()
+    skip_errors = serializers.BooleanField(default=False)
 
 
 class TransactionSerializer(serializers.ModelSerializer):
