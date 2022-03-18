@@ -9,7 +9,10 @@ asgiref==3.5.0
 django==4.0.3
     # via
     #   -r requirements.in
+    #   django-filter
     #   djangorestframework
+django-filter==21.1
+    # via -r requirements.in
 djangorestframework==3.13.1
     # via -r requirements.in
 gunicorn==20.1.0

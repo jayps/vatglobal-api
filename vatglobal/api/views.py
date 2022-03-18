@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from vatglobal.api.filters import TransactionFilter
 from vatglobal.api.models import Transaction
 from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer
 from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv
@@ -41,6 +42,7 @@ class TransactionUploadView(APIView):
 
 
 class TransactionViewSet(ReadOnlyModelViewSet):
-    queryset = Transaction.objects.all()
+    queryset = Transaction.objects.order_by('date')
     serializer_class = TransactionSerializer
+    filterset_class = TransactionFilter
 
