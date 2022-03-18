@@ -12,24 +12,23 @@ from rest_framework.exceptions import ValidationError
 from vatglobal.api.serializers import TransactionSerializer
 
 
-def get_reader_from_file(file):
+def get_line_from_csv(file):
     decoded_file = file.read().decode('UTF-8')
     csv_string = io.StringIO(decoded_file)
-    return csv.reader(csv_string, delimiter=',')
+    reader = csv.reader(csv_string, delimiter=',')
+    for line in reader:
+        yield line
 
-
-def create_transaction_from_row(row, row_index):
+def create_transaction_from_row(row):
     type = row[1].lower()
-    # TODO: Conditionally execute this based on an environment variable.
-    if type == 'sele':
-        type = 'sale'
-    if type == 'parchase':
-        type = 'purchase'
 
     try:
         transaction_date = datetime.strptime(row[0], '%Y/%m/%d').date()
     except ValueError as e:
-        raise ValidationError(f'Invalid date at line {row_index}: {row[0]}')
+        raise ValidationError(f'Invalid date {row[0]}')
+
+    if transaction_date.year != 2020:
+        return False
 
     transaction = TransactionSerializer(
         data={
@@ -43,3 +42,5 @@ def create_transaction_from_row(row, row_index):
     )
     transaction.is_valid(raise_exception=True)
     transaction.save()
+
+    return True
