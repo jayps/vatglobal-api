@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+  db:
+    image: postgres
+    container_name: vatglobal-db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=Pass123#
+    ports:
+      - 5432:5432
   web:
     build: .
     container_name: vatglobal-api
@@ -8,6 +17,15 @@ services:
       - .:/code
     ports:
       - "8000:8000"
+    depends_on:
+      - db
     environment:
       - WORKER_COUNT=3
       - WORKER_TIMEOUT=300
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST=vatglobal-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_PASSWORD=Pass123#
+volumes:
+  db-data:
