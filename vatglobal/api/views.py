@@ -36,9 +36,16 @@ class TransactionUploadView(APIView):
                     type = 'sale'
                 if type == 'parchase':
                     type = 'purchase'
+
+                try:
+                    transaction_date = datetime.strptime(row[0], '%Y/%m/%d').date()
+                except ValueError as e:
+                    # TODO: Consider returning an error here or conditionally continuing
+                    pass
+
                 transaction = TransactionSerializer(
                     data={
-                        'date': datetime.strptime(row[0], '%Y/%m/%d').date(),
+                        'date': transaction_date,
                         'type': type,
                         'country': row[2],
                         'currency': row[3],
@@ -49,6 +56,7 @@ class TransactionUploadView(APIView):
                 transaction.is_valid(raise_exception=True)
                 transaction.save()
                 line += 1
+
             except ValidationError as e:
                 return Response(data=e.detail, status=status.HTTP_400_BAD_REQUEST)
             except StopIteration:
