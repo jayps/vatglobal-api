@@ -8,8 +8,10 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from vatglobal.api.serializers import UploadRequestSerializer
+from vatglobal.api.models import Transaction
+from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer
 from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv
 
 
@@ -36,3 +38,9 @@ class TransactionUploadView(APIView):
                     return Response(data=str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(status=status.HTTP_201_CREATED)
+
+
+class TransactionViewSet(ReadOnlyModelViewSet):
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+
