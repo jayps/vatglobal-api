@@ -1,18 +1,13 @@
-import csv
-import io
 from datetime import datetime
-from multiprocessing import Pool
 
 from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from vatglobal.api.data.iso_3166_1_countries import is_valid_country_code
 from vatglobal.api.data.iso_4217_currencies import is_valid_currency_code
-from vatglobal.api.filters import TransactionFilter
 from vatglobal.api.models import Transaction
 from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer
 from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv, get_currency_conversion
