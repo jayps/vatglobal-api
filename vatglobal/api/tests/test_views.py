@@ -1,11 +1,14 @@
+import datetime
 import os.path
-from unittest import TestCase
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient
+
+from vatglobal.api.models import Transaction
 
 
 def upload_file(client, filename, skip_errors=False):
@@ -87,3 +90,37 @@ class TestTransactionViewSet(TestCase):
             {'date': '2020/01/01', 'country': 'ZA', 'currency': 'AAA'}
         )
         assert_status_code(400, response)
+
+    def test_successful_retrieval_without_conversion(self):
+        Transaction.objects.create(
+            date=datetime.date(year=2020, month=1, day=1),
+            type='purchase',
+            country='ZA',
+            currency='ZAR',
+            net=100,
+            vat=15
+        )
+        Transaction.objects.create(
+            date=datetime.date(year=2020, month=1, day=1),
+            type='sale',
+            country='ZA',
+            currency='ZAR',
+            net=200,
+            vat=30
+        )
+        Transaction.objects.create(
+            date=datetime.date(year=2020, month=1, day=2),
+            type='sale',
+            country='ZA',
+            currency='ZAR',
+            net=100,
+            vat=15
+        )
+
+        response = self.client.get(
+            reverse('retrieve'),
+            {'date': '2020/01/01', 'country': 'ZA'}
+        )
+        number_of_records_returned = len(response.json())
+
+        assert number_of_records_returned == 2, f'Expected 2 records to be returned, but got {number_of_records_returned}'
