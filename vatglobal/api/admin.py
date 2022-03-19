@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from vatglobal.api.models import Transaction
+from vatglobal.api.models import Transaction, CurrencyHistory
 
 
 class TransactionAdmin(admin.ModelAdmin):
@@ -14,4 +14,14 @@ class TransactionAdmin(admin.ModelAdmin):
     )
 
 
+class CurrencyHistoryAdmin(admin.ModelAdmin):
+    list_display = (
+        'date',
+        'from_currency',
+        'to_currency',
+        'conversion_rate',
+    )
+
+
 admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(CurrencyHistory, CurrencyHistoryAdmin)

@@ -15,3 +15,10 @@ class Transaction(models.Model):
     currency = models.CharField(max_length=32)
     net = models.FloatField()
     vat = models.FloatField()
+
+
+class CurrencyHistory(models.Model):
+    date = models.DateField()
+    from_currency = models.CharField(max_length=3)
+    to_currency = models.CharField(max_length=3)
+    conversion_rate = models.FloatField()

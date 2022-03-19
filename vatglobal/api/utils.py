@@ -12,6 +12,7 @@ from datetime import datetime
 
 from rest_framework.exceptions import ValidationError
 
+from vatglobal.api.models import CurrencyHistory
 from vatglobal.api.serializers import TransactionSerializer
 
 
@@ -49,6 +50,9 @@ def create_transaction_from_row(row):
     return True
 
 def get_currency_conversion(from_currency, to_currency, date):
+    stored_conversion_record = CurrencyHistory.objects.filter(from_currency=from_currency, to_currency=to_currency, date=date)
+    if stored_conversion_record.exists():
+        return stored_conversion_record.first().conversion_rate
     year = date.year
     month = date.strftime('%m')
     day = date.strftime('%d')
@@ -63,4 +67,8 @@ def get_currency_conversion(from_currency, to_currency, date):
     results = json.loads(response.text)
 
     # This took some figuring out to do from looking at the responses and working out some jsonpath stuff in insomnia
-    return results.get('dataSets')[0].get('series').get('0:0:0:0:0').get('observations').get('0')[0]
+    conversion_rate = results.get('dataSets')[0].get('series').get('0:0:0:0:0').get('observations').get('0')[0]
+
+    CurrencyHistory.objects.create(from_currency=from_currency, to_currency=to_currency, date=date, conversion_rate=conversion_rate)
+
+    return conversion_rate
