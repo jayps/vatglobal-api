@@ -96,7 +96,7 @@ def convert_transaction_list_currency(queryset, desired_currency, filtered_date)
             raise HTTPError(f'Could not fetch conversion rate from {currency} to {desired_currency} for {filtered_date}')
 
     for transaction in queryset:
-        if currency_map.get(transaction.currency) is not None:
+        if transaction.currency is not desired_currency and currency_map.get(transaction.currency) is not None:
             transaction.net = transaction.net * currency_map[transaction.currency]
             transaction.vat = transaction.vat * currency_map[transaction.currency]
             transaction.currency = desired_currency
