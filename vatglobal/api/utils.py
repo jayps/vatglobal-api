@@ -9,7 +9,9 @@ import requests
 # Basically, we're reading the file from memory as bytes, decoding that to a string, and producing an input for a CSV reader.
 from datetime import datetime
 
+from requests import HTTPError
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from vatglobal.api.models import CurrencyHistory
 from vatglobal.api.serializers import TransactionSerializer
@@ -78,3 +80,23 @@ def get_currency_conversion(from_currency, to_currency, date):
                                    conversion_rate=conversion_rate)
 
     return conversion_rate
+
+
+def convert_transaction_list_currency(queryset, desired_currency, filtered_date):
+    from_currencies_list = list(
+        set([transaction.currency for transaction in queryset if transaction.currency != desired_currency]))
+    currency_map = {}
+    for currency in from_currencies_list:
+        try:
+            currency_map[currency] = get_currency_conversion(currency, desired_currency, filtered_date)
+        except HTTPError:
+            # Just changing the error message here to something more readable.
+            raise HTTPError(f'Could not fetch conversion rate from {currency} to {desired_currency} for {filtered_date}')
+
+    for transaction in queryset:
+        if currency_map.get(transaction.currency) is not None:
+            transaction.net = transaction.net * currency_map[transaction.currency]
+            transaction.vat = transaction.vat * currency_map[transaction.currency]
+            transaction.currency = desired_currency
+
+    return queryset

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db import transaction
+from requests import HTTPError
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -10,7 +11,8 @@ from vatglobal.api.data.iso_3166_1_countries import is_valid_country_code
 from vatglobal.api.data.iso_4217_currencies import is_valid_currency_code
 from vatglobal.api.models import Transaction
 from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer
-from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv, get_currency_conversion
+from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv, get_currency_conversion, \
+    convert_transaction_list_currency
 
 
 class TransactionUploadView(APIView):
@@ -65,16 +67,9 @@ class TransactionViewSet(APIView):
         queryset = queryset.filter(date=filtered_date, country=country)#[:5]
 
         if desired_currency:
-            from_currencies_list = list(set([transaction.currency for transaction in queryset if transaction.currency != desired_currency]))
-            currency_map = {}
-            for currency in from_currencies_list:
-                try:
-                    currency_map[currency] = get_currency_conversion(currency, desired_currency, filtered_date)
-                except Exception as e:
-                    return Response({'error': f'Could not fetch exchange rates for {currency} to {desired_currency} for {filtered_date}: {str(e)}'})
-            for transaction in queryset:
-                transaction.net = transaction.net * currency_map[transaction.currency]
-                transaction.vat = transaction.vat * currency_map[transaction.currency]
-                transaction.currency = desired_currency
+            try:
+                queryset = convert_transaction_list_currency(queryset, desired_currency, filtered_date)
+            except HTTPError as e:
+                return Response(data={'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(data=TransactionSerializer(queryset, many=True).data, status=status.HTTP_200_OK)
