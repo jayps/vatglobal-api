@@ -63,9 +63,15 @@ class TransactionViewSet(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         currency = request.GET.get('currency')
-        if not is_valid_currency_code(currency):
+        if currency and not is_valid_currency_code(currency):
             return Response(data={'error': 'currency query parameter must be ISO-4217'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        queryset = queryset.filter(date=filtered_date, country=country)
-        return Response(data=TransactionSerializer(queryset[:5], many=True).data, status=status.HTTP_200_OK)
+        queryset = queryset.filter(date=filtered_date, country=country)[:5]
+
+        if currency:
+            from_currencies = list(set([transaction.currency for transaction in queryset if transaction.currency != currency]))
+            print("Currencies to convert", from_currencies)
+            pass
+
+        return Response(data=TransactionSerializer(queryset, many=True).data, status=status.HTTP_200_OK)
