@@ -73,3 +73,17 @@ class TestTransactionViewSet(TestCase):
         )
         assert_status_code(400, response)
         assert_error_message('date query parameter must be in the format YYYY/MM/DD', response)
+
+    def test_when_invalid_country_code_supplied_returns_400(self):
+        response = self.client.get(
+            reverse('retrieve'),
+            {'date': '2020/01/01', 'country': 'ZZ', 'currency': 'ZAR'}
+        )
+        assert_status_code(400, response)
+
+    def test_when_invalid_currency_code_supplied_returns_400(self):
+        response = self.client.get(
+            reverse('retrieve'),
+            {'date': '2020/01/01', 'country': 'ZA', 'currency': 'AAA'}
+        )
+        assert_status_code(400, response)
