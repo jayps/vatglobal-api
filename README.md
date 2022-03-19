@@ -109,3 +109,9 @@ For a speed improvement, I might recommend a few different approaches:
         - Read the file line by line
         - Add each line into a queue
         - Have a whole separate process pick up jobs from the queue and process information
+
+# Other potential improvements
+There are a few other things that I would improve on this project:
+- Automated docs: It's nice to have self documenting code. I generally use [drf-yasg](https://drf-yasg.readthedocs.io/en/stable/) for that. 
+- Better use of filters: the [django-filter](https://django-filter.readthedocs.io/en/stable/) package allows for some cool filtering capabilities. I wrote very manual code for filters in this demo. `django-filter` would have allowed for cleaner code in terms of filtering for the retrieval endpoint.
+- Helm charts/K8s manifests: I've not added it here, but we could easily deploy this to k8s or some other scalable cloud solution so that we can scale horizontally with fair ease. '
