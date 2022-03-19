@@ -21,3 +21,4 @@ python manage.py createsuperuser
 ```
 python manage.py runserver
 ```
+Testing URL: http://localhost:8000/api/transactions/retrieveRows/?date=2020%2F01%2F07&country=IT&currency=ZAR

@@ -4,7 +4,6 @@ import json
 
 import requests
 
-
 # Since we're not saving the file, just using it in memory, we have to do a little magic.
 # Check out https://andromedayelton.com/2017/04/25/adventures-with-parsing-django-uploaded-csv-files-in-python3/ for a more in depth explanation.
 # Basically, we're reading the file from memory as bytes, decoding that to a string, and producing an input for a CSV reader.
@@ -22,6 +21,7 @@ def get_line_from_csv(file):
     reader = csv.reader(csv_string, delimiter=',')
     for line in reader:
         yield line
+
 
 def create_transaction_from_row(row):
     type = row[1].lower()
@@ -49,10 +49,13 @@ def create_transaction_from_row(row):
 
     return True
 
+
 def get_currency_conversion(from_currency, to_currency, date):
-    stored_conversion_record = CurrencyHistory.objects.filter(from_currency=from_currency, to_currency=to_currency, date=date)
+    stored_conversion_record = CurrencyHistory.objects.filter(from_currency=from_currency, to_currency=to_currency,
+                                                              date=date)
     if stored_conversion_record.exists():
         return stored_conversion_record.first().conversion_rate
+
     year = date.year
     month = date.strftime('%m')
     day = date.strftime('%d')
@@ -60,15 +63,18 @@ def get_currency_conversion(from_currency, to_currency, date):
     frequency = 'D'
     exr_type = 'SP00'
     series_variation = 'A'
-    data_flow = 'EXR' # exchange rates
+    data_flow = 'EXR'  # exchange rates
+
     url = f'https://sdw-wsrest.ecb.europa.eu/service/{resource}/{data_flow}/{frequency}.{to_currency}.{from_currency}.{exr_type}.{series_variation}?startPeriod={year}-{month}-{day}&endPeriod={year}-{month}-{day}'
+
     response = requests.get(url, headers={'Accept': 'application/json'})
     response.raise_for_status()
-    results = json.loads(response.text)
+    results = response.json()
 
     # This took some figuring out to do from looking at the responses and working out some jsonpath stuff in insomnia
     conversion_rate = results.get('dataSets')[0].get('series').get('0:0:0:0:0').get('observations').get('0')[0]
 
-    CurrencyHistory.objects.create(from_currency=from_currency, to_currency=to_currency, date=date, conversion_rate=conversion_rate)
+    CurrencyHistory.objects.create(from_currency=from_currency, to_currency=to_currency, date=date,
+                                   conversion_rate=conversion_rate)
 
     return conversion_rate
