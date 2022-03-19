@@ -52,12 +52,7 @@ def create_transaction_from_row(row):
     return True
 
 
-def get_currency_conversion(from_currency, to_currency, date):
-    stored_conversion_record = CurrencyHistory.objects.filter(from_currency=from_currency, to_currency=to_currency,
-                                                              date=date)
-    if stored_conversion_record.exists():
-        return stored_conversion_record.first().conversion_rate
-
+def get_currency_conversion_rate_from_ecb(date, from_currency, to_currency):
     year = date.year
     month = date.strftime('%m')
     day = date.strftime('%d')
@@ -66,15 +61,22 @@ def get_currency_conversion(from_currency, to_currency, date):
     exr_type = 'SP00'
     series_variation = 'A'
     data_flow = 'EXR'  # exchange rates
-
     url = f'https://sdw-wsrest.ecb.europa.eu/service/{resource}/{data_flow}/{frequency}.{to_currency}.{from_currency}.{exr_type}.{series_variation}?startPeriod={year}-{month}-{day}&endPeriod={year}-{month}-{day}'
-
     response = requests.get(url, headers={'Accept': 'application/json'})
     response.raise_for_status()
     results = response.json()
-
     # This took some figuring out to do from looking at the responses and working out some jsonpath stuff in insomnia
     conversion_rate = results.get('dataSets')[0].get('series').get('0:0:0:0:0').get('observations').get('0')[0]
+    return conversion_rate
+
+
+def get_currency_conversion(from_currency, to_currency, date):
+    stored_conversion_record = CurrencyHistory.objects.filter(from_currency=from_currency, to_currency=to_currency,
+                                                              date=date)
+    if stored_conversion_record.exists():
+        return stored_conversion_record.first().conversion_rate
+
+    conversion_rate = get_currency_conversion_rate_from_ecb(date, from_currency, to_currency)
 
     CurrencyHistory.objects.create(from_currency=from_currency, to_currency=to_currency, date=date,
                                    conversion_rate=conversion_rate)
