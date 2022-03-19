@@ -42,8 +42,7 @@ class TransactionUploadView(APIView):
 
 class TransactionViewSet(APIView):
     def get(self, request):
-        queryset = Transaction.objects.order_by('date')
-
+        # Get filters
         date = request.GET.get('date')
         if not date:
             return Response(data={'error': 'date query parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -64,7 +63,8 @@ class TransactionViewSet(APIView):
             return Response(data={'error': 'currency query parameter must be ISO-4217'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        queryset = queryset.filter(date=filtered_date, country=country)#[:5]
+        # Intial queryset
+        queryset = Transaction.objects.order_by('date').filter(date=filtered_date, country=country)
 
         if desired_currency:
             try:
