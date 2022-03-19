@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    container_name: vatglobal-api-test
+    entrypoint: ["sh", "/code/entrypoint.test.sh"]
+    volumes:
+      - .:/code
+    environment:
+      - DJANGO_SETTINGS_MODULE=vatglobal.settings_test
