@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from vatglobal.api.data.iso_3166_1_countries import is_valid_country_code
+from vatglobal.api.data.iso_4217_currencies import is_valid_currency_code
 from vatglobal.api.filters import TransactionFilter
 from vatglobal.api.models import Transaction
 from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer
@@ -22,10 +24,10 @@ class TransactionUploadView(APIView):
         serializer.is_valid(raise_exception=True)
         skip_errors = serializer.validated_data.get('skip_errors', False)
 
-        file = request.FILES['file'] # Get the file from the request
+        file = request.FILES['file']  # Get the file from the request
 
         reader = get_line_from_csv(file)
-        next(reader) # Skip header
+        next(reader)  # Skip header
 
         with transaction.atomic():
             for line in reader:
@@ -52,14 +54,18 @@ class TransactionViewSet(APIView):
         try:
             filtered_date = datetime.strptime(date, '%Y-%m-%d').date()
         except ValueError as e:
-            return Response(data={'error': 'date query parameter must be in the format YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={'error': 'date query parameter must be in the format YYYY-MM-DD'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         country = request.GET.get('country')
-        if len(country) != 2:
+        if not is_valid_country_code(country):
             return Response(data={'error': 'country query parameter must be ISO-3166-1 alpha-2'},
                             status=status.HTTP_400_BAD_REQUEST)
 
+        currency = request.GET.get('currency')
+        if not is_valid_currency_code(currency):
+            return Response(data={'error': 'currency query parameter must be ISO-4217'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         queryset = queryset.filter(date=filtered_date, country=country)
-
         return Response(data=TransactionSerializer(queryset[:5], many=True).data, status=status.HTTP_200_OK)
-
