@@ -3,8 +3,8 @@ import io
 from datetime import datetime
 
 import requests
-from requests import HTTPError
-from rest_framework.exceptions import ValidationError
+from requests import HTTPError, JSONDecodeError
+from rest_framework.exceptions import ValidationError, NotFound
 
 from vatglobal.api.models import CurrencyHistory
 from vatglobal.api.serializers import TransactionSerializer
@@ -65,10 +65,15 @@ def get_currency_conversion_rate_from_ecb(date, from_currency, to_currency):
     url = f'https://sdw-wsrest.ecb.europa.eu/service/{resource}/{data_flow}/{frequency}.{to_currency}.{from_currency}.{exr_type}.{series_variation}?startPeriod={year}-{month}-{day}&endPeriod={year}-{month}-{day}'
     response = requests.get(url, headers={'Accept': 'application/json'})
     response.raise_for_status()
-    results = response.json()
-    # This took some figuring out to do from looking at the responses and working out some jsonpath stuff in insomnia
-    conversion_rate = results.get('dataSets')[0].get('series').get('0:0:0:0:0').get('observations').get('0')[0]
-    return conversion_rate
+    try:
+        results = response.json()
+        # This took some figuring out to do from looking at the responses and working out some jsonpath stuff in insomnia
+        conversion_rate = results.get('dataSets')[0].get('series').get('0:0:0:0:0').get('observations').get('0')[0]
+        return conversion_rate
+    except JSONDecodeError:
+        # Not sure if this is the most appropriate error but I think it's fine for now, since the only time this
+        # seems to happen is when there are no results returned.
+        raise HTTPError(f'No results found for {from_currency} to {to_currency} for {date}')
 
 
 def get_currency_conversion(from_currency, to_currency, date):
