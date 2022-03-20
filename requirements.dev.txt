@@ -16,6 +16,15 @@ charset-normalizer==2.0.12
     # via
     #   -r requirements.txt
     #   requests
+coreapi==2.3.3
+    # via
+    #   -r requirements.txt
+    #   drf-yasg
+coreschema==0.0.4
+    # via
+    #   -r requirements.txt
+    #   coreapi
+    #   drf-yasg
 coverage==6.3.2
     # via -r requirements.dev.in
 django==4.0.3
@@ -23,9 +32,14 @@ django==4.0.3
     #   -r requirements.txt
     #   django-filter
     #   djangorestframework
+    #   drf-yasg
 django-filter==21.1
     # via -r requirements.txt
 djangorestframework==3.13.1
+    # via
+    #   -r requirements.txt
+    #   drf-yasg
+drf-yasg==1.20.0
     # via -r requirements.txt
 gunicorn==20.1.0
     # via -r requirements.txt
@@ -33,22 +47,63 @@ idna==3.3
     # via
     #   -r requirements.txt
     #   requests
+inflection==0.5.1
+    # via
+    #   -r requirements.txt
+    #   drf-yasg
+itypes==1.2.0
+    # via
+    #   -r requirements.txt
+    #   coreapi
+jinja2==3.0.3
+    # via
+    #   -r requirements.txt
+    #   coreschema
+markupsafe==2.1.1
+    # via
+    #   -r requirements.txt
+    #   jinja2
+packaging==21.3
+    # via
+    #   -r requirements.txt
+    #   drf-yasg
 psycopg2==2.9.3
     # via -r requirements.txt
+pyparsing==3.0.7
+    # via
+    #   -r requirements.txt
+    #   packaging
 pytz==2021.3
     # via
     #   -r requirements.txt
     #   djangorestframework
 requests==2.27.1
-    # via -r requirements.txt
+    # via
+    #   -r requirements.txt
+    #   coreapi
+ruamel-yaml==0.17.21
+    # via
+    #   -r requirements.txt
+    #   drf-yasg
+ruamel-yaml-clib==0.2.6
+    # via
+    #   -r requirements.txt
+    #   ruamel-yaml
 sqlparse==0.4.2
     # via
     #   -r requirements.txt
     #   django
+uritemplate==4.1.1
+    # via
+    #   -r requirements.txt
+    #   coreapi
+    #   drf-yasg
 urllib3==1.26.9
     # via
     #   -r requirements.txt
     #   requests
+whitenoise==6.0.0
+    # via -r requirements.txt
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
