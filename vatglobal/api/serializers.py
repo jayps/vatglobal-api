@@ -11,9 +11,19 @@ class UploadRequestSerializer(serializers.Serializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    date = serializers.DateField(input_formats=['%Y/%m/%d'])
+
     class Meta:
         model = Transaction
-        fields = '__all__'
+        fields = (
+            'id',
+            'date',
+            'type',
+            'country',
+            'currency',
+            'net',
+            'vat',
+        )
 
 
 class TransactionFiltersSerializer(serializers.Serializer):

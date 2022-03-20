@@ -25,17 +25,9 @@ def create_transaction_from_row(row):
     # Row format should be Date,Purchase/Sale,Country,Currency,Net,VAT
     type = row[1].lower()
 
-    try:
-        transaction_date = datetime.strptime(row[0], '%Y/%m/%d').date()
-    except ValueError as e:
-        raise ValidationError(f'Invalid date {row[0]}')
-
-    if transaction_date.year != 2020:
-        return False
-
     transaction = TransactionSerializer(
         data={
-            'date': transaction_date,
+            'date': row[0],
             'type': type,
             'country': row[2],
             'currency': row[3],
@@ -46,6 +38,9 @@ def create_transaction_from_row(row):
 
     # Throw validation errors according to the rule of the serializer. Things like invalid 'type' fields will come up here.
     transaction.is_valid(raise_exception=True)
+    if transaction.validated_data.get('date').year != 2020:
+        return False
+
     transaction.save()
 
     return True
