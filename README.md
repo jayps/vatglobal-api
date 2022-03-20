@@ -102,9 +102,9 @@ For a speed improvement, I might recommend a few different approaches:
   to receive large volumes of data over time with fair ease.
 - If the information is only available in CSV format as it is in this exercise, then the above solution won't work. In
   that case, I would recommend one of two solutions:
-    - Multithreading: This isn't something that I've had great experience with in Python, but it could work. If we have
-      enough CPU power available, we could divide the work into chunks and send it off to multiple CPUs.
-    - Queueing: **This is the solution I would recommend**. Reading a large file isn't a problem - processing large
+    - Multiprocessing: This isn't something that I've had great experience with in Python, but it could work. If we have
+      enough CPU power available, we could divide the work into chunks and send it off to multiple processes.
+    - Queueing: **This is the solution I would recommend**. Reading a large file isn't necessarily a problem - processing large
       amounts of data is where the problem sits. To solve that, I would use a queueing mechanism. This is similar to
       multithreading/multiprocessing on the face of it, but I've found better success with this in the past. Queueing
       would also work pretty well with running multiple instances of this API as microservices.    - The process would look something like this:
