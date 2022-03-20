@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from vatglobal.api.data.iso_3166_1_countries import is_valid_country_code
 from vatglobal.api.data.iso_4217_currencies import is_valid_currency_code
 from vatglobal.api.models import Transaction
-from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer
+from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer, TransactionFiltersSerializer
 from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv, get_currency_conversion, \
     convert_transaction_list_currency
 
@@ -42,26 +42,12 @@ class TransactionUploadView(APIView):
 
 class TransactionViewSet(APIView):
     def get(self, request):
-        # Get filters
-        date = request.GET.get('date')
-        if not date:
-            return Response(data={'error': 'date query parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        filters = TransactionFiltersSerializer(data=request.GET)
+        filters.is_valid(raise_exception=True)
 
-        try:
-            filtered_date = datetime.strptime(date, '%Y/%m/%d').date()
-        except ValueError as e:
-            return Response(data={'error': 'date query parameter must be in the format YYYY/MM/DD'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        country = request.GET.get('country')
-        if not is_valid_country_code(country):
-            return Response(data={'error': 'country query parameter must be ISO-3166-1 alpha-2'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        desired_currency = request.GET.get('currency')
-        if desired_currency and not is_valid_currency_code(desired_currency):
-            return Response(data={'error': 'currency query parameter must be ISO-4217'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        filtered_date = filters.validated_data.get('date')
+        country = filters.validated_data.get('country')
+        desired_currency = filters.validated_data.get('currency')
 
         # Intial queryset
         queryset = Transaction.objects.order_by('date').filter(date=filtered_date, country=country)

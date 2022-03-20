@@ -61,22 +61,6 @@ class TestTransactionViewSet(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-    def test_when_no_date_supplied_returns_400(self):
-        response = self.client.get(
-            reverse('retrieve'),
-            {'country': 'ZA', 'currency': 'ZAR'}
-        )
-        assert_status_code(400, response)
-        assert_error_message('date query parameter is required.', response)
-
-    def test_when_invalid_date_supplied_returns_400(self):
-        response = self.client.get(
-            reverse('retrieve'),
-            {'date': 'thisIsNotADate', 'country': 'ZA', 'currency': 'ZAR'}
-        )
-        assert_status_code(400, response)
-        assert_error_message('date query parameter must be in the format YYYY/MM/DD', response)
-
     def test_when_invalid_country_code_supplied_returns_400(self):
         response = self.client.get(
             reverse('retrieve'),
