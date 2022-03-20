@@ -52,7 +52,7 @@ docker exec -it vatglobal-api python manage.py createsuperuser
 # Endpoints
 
 ## Swagger Docs
-Docs can be seen at [http://localhost:8000/swagger/](http://localhost:8000/swagger/) when the API is running.
+Docs can be seen at [http://localhost:8000/swagger/](http://localhost:8000/swagger/) when the API is running.  These docs can also be used to test the API without needing to set up anything special in [insert name of your favourite REST client here].
 
 ## processFile
 
