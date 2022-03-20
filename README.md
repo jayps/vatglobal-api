@@ -75,7 +75,7 @@ Use this endpoint to retrieve transactions.
 
 Some filters are available via query parameters.  
 `date`: **Required**. Date field, in the format `YYYY/MM/DD`.   
-`country`: **Required**. Country code, in [ISO-3166-1 alpha-2](https://datahub.io/core/country-list#data) format.   
+`country`: **Required**. Country code, in [ISO-3166-1 alpha-2](https://datahub.io/core/country-list#data) format. **NOTE:** Some transactions' countries are imported using their full ISO-3166 names. I've written the code to match those from the alpha-2 codes as well. For instance, querying for `IT` will also find transactions for `Italy`.    
 `currency`: **Optional**. Currency code, in [ISO-4217](https://datahub.io/core/currency-codes#data) format. **NOTE**: If the conversion that you are requesting is unavailable, the call will fail with a 404 status code. I figured this is better than returning data incorrectly without conversions - if you want the data without conversion, you could just omit the currency code.
 
 **Example**: [http://localhost:8000/api/transactions/retrieveRows/?date=2020%2F01%2F07&country=IT&currency=ZAR](http://localhost:8000/api/transactions/retrieveRows/?date=2020%2F01%2F07&country=IT&currency=ZAR)

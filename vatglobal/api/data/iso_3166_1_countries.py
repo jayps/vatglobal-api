@@ -249,6 +249,17 @@ countries = [
     {"code": "ZW", "name": "Zimbabwe"}
 ]
 
+def find_matching_codes(code):
+    return list(filter(lambda c: c['code'] == code, countries))
+
 def is_valid_country_code(code: str) -> bool:
-    found = list(filter(lambda c: c['code'] == code, countries))
+    found = find_matching_codes(code)
     return len(found) > 0
+
+
+def get_country_code_name(code):
+    found = find_matching_codes(code)
+    if found:
+        return found[0].get('name')
+
+    return None

@@ -7,6 +7,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from vatglobal.api.data.iso_3166_1_countries import get_country_code_name
 from vatglobal.api.models import Transaction
 from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer, TransactionFiltersSerializer
 from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv, convert_transaction_list_currency
@@ -64,8 +65,10 @@ class TransactionViewSet(APIView):
         country = filters.validated_data.get('country')
         desired_currency = filters.validated_data.get('currency')
 
-        # Intial queryset
-        queryset = Transaction.objects.order_by('date').filter(date=filtered_date, country=country)
+        queryset = Transaction.objects.order_by('date').filter(
+            date=filtered_date,
+            country__in=(country, get_country_code_name(country))
+        )
 
         if desired_currency:
             try:
