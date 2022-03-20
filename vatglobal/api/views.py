@@ -1,21 +1,28 @@
-from datetime import datetime
-
 from django.db import transaction
+from drf_yasg.utils import swagger_auto_schema
 from requests import HTTPError
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from vatglobal.api.data.iso_3166_1_countries import is_valid_country_code
-from vatglobal.api.data.iso_4217_currencies import is_valid_currency_code
 from vatglobal.api.models import Transaction
 from vatglobal.api.serializers import UploadRequestSerializer, TransactionSerializer, TransactionFiltersSerializer
-from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv, get_currency_conversion, \
-    convert_transaction_list_currency
+from vatglobal.api.utils import create_transaction_from_row, get_line_from_csv, convert_transaction_list_currency
 
 
 class TransactionUploadView(APIView):
+    parser_classes = (MultiPartParser,)
+    @swagger_auto_schema(
+        operation_description='Upload a CSV containing transactions.',
+        responses={
+            201: 'Successfully stored transactions',
+            400: 'Invalid content in CSV',
+            500: 'Internal server error / something unexpected happened'
+        },
+        request_body=UploadRequestSerializer
+    )
     def post(self, request, format=None):
         serializer = UploadRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -41,6 +48,14 @@ class TransactionUploadView(APIView):
 
 
 class TransactionViewSet(APIView):
+    @swagger_auto_schema(
+        operation_description='Retrieve a list of transactions.',
+        responses={
+            200: 'Successfully retrieved transactions',
+            404: 'Could not retrieve conversion rates from ECB API',
+        },
+        query_serializer=TransactionFiltersSerializer
+    )
     def get(self, request):
         filters = TransactionFiltersSerializer(data=request.GET)
         filters.is_valid(raise_exception=True)

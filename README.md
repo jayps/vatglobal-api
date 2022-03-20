@@ -51,6 +51,9 @@ docker exec -it vatglobal-api python manage.py createsuperuser
 
 # Endpoints
 
+## Swagger Docs
+Docs can be seen at [http://localhost:8000/swagger/](http://localhost:8000/swagger/) when the API is running.
+
 ## processFile
 
 Endpoint: `POST http://localhost:8000/api/transactions/processFile/`  
@@ -112,6 +115,5 @@ For a speed improvement, I might recommend a few different approaches:
 
 # Other potential improvements
 There are a few other things that I would improve on this project:
-- Automated docs: It's nice to have self documenting code. I generally use [drf-yasg](https://drf-yasg.readthedocs.io/en/stable/) for that. 
 - Helm charts/K8s manifests: I've not added it here, but we could easily deploy this to k8s or some other scalable cloud solution so that we can scale horizontally with fair ease. '
 - Better automation and management: You need knowledge of things like pip-tools and docker-specific ways of executing things in a container. I prefer having a single tool to address most of (or all of) our needs - something like a makefile, although I'm not a fan of those since that's just _anoooother_ tool. I think it's just nice for very junior developers to be able to use a single tool to manage things, focussing only on the code and avoiding tool-fatigue.
